@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -19,6 +20,7 @@ import java.util.stream.StreamSupport;
 public class PersonService {
 
     private final PersonRepository repository;
+    private final SubjectService subjectService;
     private final PersonMapper mapper;
 
     public Person findById(String id) {
@@ -31,7 +33,13 @@ public class PersonService {
 
     @Transactional
     public Person insert(PersonDTO personDTO) {
+
         Person person = mapper.toModel(personDTO);
+
+        if (Objects.nonNull(personDTO.getSubjects()) && !personDTO.getSubjects().isEmpty()) {
+            personDTO.getSubjects().forEach(subjectDTO -> subjectService.insert(subjectDTO));
+        }
+
         return repository.save(person);
     }
 
